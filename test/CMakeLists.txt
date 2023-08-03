@@ -1,1 +1,2 @@
 add_subdirectory(ssd1306_test)
+add_subdirectory(fractal_tree)
