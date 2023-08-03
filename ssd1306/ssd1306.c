@@ -15,6 +15,8 @@ SSD1306_Display *ssd1306_init(void)
     display->max_y = 64;
     display->frame_length = 1025;
     display->frame = buffer;
+    display->cursor_position = 1;
+    display->line_limit = 128;
 
     const uint8_t init_commands[27] = {
         SSD1306_CONTROL_BYTE_COMMAND,
@@ -51,6 +53,8 @@ void ssd1306_destroy_display(SSD1306_Display *d)
 
 void ssd1306_clean(SSD1306_Display *d)
 {
+    d->cursor_position = 1;
+    d->line_limit = 128;
     uint32_t i = d->frame_length;
     while (--i)
         *(d->frame + i) = 0x00;
@@ -171,4 +175,55 @@ void ssd1306_draw_circle(SSD1306_Display *d, int8_t cx, int8_t cy, int8_t r)
         if (r > x || e > y)
             e += ++x * 2 + 1;
     } while (x < 0);
+}
+
+void ssd1306_set_font(SSD1306_Display *d, SSD1306_Font *f)
+{
+    d->font = f;
+    ssd1306_set_cursor(d, 0, 0);
+}
+
+void ssd1306_set_cursor(SSD1306_Display *d, uint8_t c, uint8_t r)
+{
+    if (r > (d->pages - d->font->character_height))
+        r = d->pages - d->font->character_height;
+    if (c > d->max_x)
+        c = 0;
+    d->cursor_position = 1 + c + r * d->width;
+    d->line_limit = d->width * (r + 1);
+}
+
+void ssd1306_print(SSD1306_Display *d, const char *text)
+{
+    uint32_t i = 0;
+    while (*(text + i))
+    {
+        uint32_t character = text[i] - d->font->first_character;
+        if (character > (d->font->last_character - d->font->first_character))
+        {
+            character = d->font->overflow_character - d->font->first_character;
+        }
+        uint8_t char_width = d->font->character_width[character];
+        if ((d->cursor_position + char_width) > d->line_limit)
+        {
+            uint8_t p = d->line_limit / d->width;
+            if (p == 7)
+                break;
+            else
+                ssd1306_set_cursor(d, 0, (p + (d->font)->character_height) - 1);
+        }
+        for (int j = 0; j < char_width; j++)
+        {
+            uint32_t offset = (d->font)->character_offset[character] + j;
+            d->frame[d->cursor_position + j] |= (d->font)->font_array[offset];
+            uint32_t vertical_index = d->cursor_position + d->width + j;
+            for (int k = 0; k < ((d->font)->character_height - 1); k++)
+            {
+                d->frame[vertical_index] |= (d->font)->font_array[(d->font)->vertical_offsets[k] + offset];
+                vertical_index += d->width;
+            }
+        }
+        d->cursor_position += char_width + d->font->character_spacing;
+        i++;
+    }
 }

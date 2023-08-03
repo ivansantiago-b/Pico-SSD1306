@@ -9,6 +9,7 @@
 
 // #include <stdint.h>
 #include "hardware/i2c.h"
+#include "ssd1306_font.h"
 
 /**
  * I2C instance
@@ -310,6 +311,18 @@
  * Control byte that indicates that the following byte is a data
  */
 #define SSD1306_CONTROL_BYTE_DATA 0x40
+/**
+ * Text aligned to center
+*/
+#define SSD1306_TEXT_CENTER
+/**
+ * Text aligned to left
+*/
+#define SSD1306_TEXT_LEFT
+/**
+ * Text aligned to right
+*/
+#define SSD1306_TEXT_RIGHT
 
 typedef struct ssd1306_display
 {
@@ -320,6 +333,10 @@ typedef struct ssd1306_display
     uint8_t max_y;
     uint32_t frame_length;
     uint8_t *frame;
+    
+    SSD1306_Font *font;
+    uint32_t cursor_position;
+    uint32_t line_limit;
 } SSD1306_Display;
 
 /**
@@ -394,4 +411,41 @@ void ssd1306_draw_ellipse(SSD1306_Display *d, int8_t cx, int8_t cy, int8_t a, in
  * @param r radius
 */
 void ssd1306_draw_circle(SSD1306_Display *d, int8_t cx, int8_t cy, int8_t r);
+
+/**
+ * Sets cursor position
+ * @param d pointer to SSD1306_Display
+ * @param c column [0 - d.width]
+ * @param r row [0 - (d.pages - font_height)]
+*/
+void ssd1306_set_cursor(SSD1306_Display *d, uint8_t c, uint8_t r);
+
+/**
+ * Sets the SSD1306_Font on the SSD1306_Display and sets the cursor position to (0, 0)
+ * @param d pointer to SSD1306_Display
+ * @param font pointer to font to set
+*/
+void ssd1306_set_font(SSD1306_Display *d, SSD1306_Font *f);
+
+/**
+ * Draws a text on the SSD1306_Display frame
+ * @param d pointer to SSD1306_Display
+ * @param text text to print
+*/
+void ssd1306_print(SSD1306_Display *d, const char *text);
+
+/**
+ * Draws a text on the SSD1306_Display frame and moves the cursor to the next line
+ * @param d ponter to SSD1306_Display
+ * @param text text to print
+*/
+void ssd1306_println(SSD1306_Display *d, const char *text);
+
+/**
+ * Draws a text aligned on the SSD1306_Display frame and moves the cursor to the next line
+ * @param d ponter to SSD1306_Display
+ * @param text text to print
+ * @param a alignement: SSD1306_TEXT_CENTER, SSD1306_TEXT_LEFT or SSD1306_TEXT_RIGHT
+*/
+void ssd1306_print_aligned(SSD1306_Display *d, const char *text, uint8_t a);
 #endif
