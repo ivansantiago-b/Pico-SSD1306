@@ -73,3 +73,63 @@ void ssd1306_put_pixel(SSD1306_Display *d, uint8_t x, uint8_t y)
         }
     }
 }
+
+void ssd1306_draw_line(SSD1306_Display *d, int8_t x1, int8_t y1, int8_t x2, int8_t y2)
+{
+    if ((y1 > 0 || y2 > 0) && (x1 > 0 || x2 > 0))
+    {
+        if (y1 < 0)
+            y1 = 0;
+        else if (y1 > d->max_y)
+            y1 = d->max_y;
+        if (y2 < 0)
+            y2 = 0;
+        else if (y2 > d->max_y)
+            y2 = d->max_y;
+        if (x1 < 0)
+            x1 = 0;
+        else if (x1 > d->max_x)
+            x1 = d->max_x;
+        if (x2 < 0)
+            x2 = 0;
+        else if (x2 > d->max_x)
+            x2 = d->max_x;
+
+        int16_t dx = x2 - x1;
+        int16_t dy = y2 - y1;
+        int16_t sx = 1;
+        int16_t sy = 1;
+        if (dx < 0)
+        {
+            dx = -dx;
+            sx = -1;
+        }
+        if (dy < 0)
+        {
+            dy = -dy;
+            sy = -1;
+        }
+        dy = -dy;
+        int16_t e = dx + dy;
+        int16_t de;
+        for (;;)
+        {
+            ssd1306_put_pixel(d, (uint8_t)x1, (uint8_t)y1);
+            de = 2 * e;
+            if (de >= dy)
+            {
+                if (x1 == x2)
+                    break;
+                e += dy;
+                x1 += sx;
+            }
+            if (de <= dx)
+            {
+                if (y1 == y2)
+                    break;
+                e += dx;
+                y1 += sy;
+            }
+        }
+    }
+}

@@ -16,11 +16,15 @@ int main(void)
 
     SSD1306_Display *display = ssd1306_init();
     ssd1306_clean(display);
-    ssd1306_put_pixel(display, 0, 0);
-    ssd1306_put_pixel(display, 127, 0);
-    ssd1306_put_pixel(display, 64, 32);
-    ssd1306_put_pixel(display, 0, 63);
-    ssd1306_put_pixel(display, 127, 63);
+    // ssd1306_put_pixel(display, 0, 0);
+    // ssd1306_put_pixel(display, 127, 0);
+    // ssd1306_put_pixel(display, 64, 32);
+    // ssd1306_put_pixel(display, 0, 63);
+    // ssd1306_put_pixel(display, 127, 63);
+    ssd1306_draw_line(display, 0, 0, 127, 63);
+    ssd1306_draw_line(display, 127, 0, 0, 63);
+    ssd1306_draw_line(display, 64, 0, 64, 16);
+    ssd1306_draw_line(display, 0, 32, 16, 32);
     ssd1306_update_graphics(display);
     return 0;
 }

@@ -354,4 +354,14 @@ void ssd1306_update_graphics(SSD1306_Display *d);
  * @param y position on the y-axis
 */
 void ssd1306_put_pixel(SSD1306_Display *d, uint8_t x, uint8_t y);
+
+/**
+ * Draw a line from (x1, y1) to (x2, y2) on the SSD1306_Display frame
+ * @param d pointer to SSD1306_Display
+ * @param x1 first point x-axis position
+ * @param y1 first point y-axis position
+ * @param x2 second point x-axis position
+ * @param y2 second point y-axis position
+*/
+void ssd1306_draw_line(SSD1306_Display *d, int8_t x1, int8_t y1, int8_t x2, int8_t y2);
 #endif
