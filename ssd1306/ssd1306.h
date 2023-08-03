@@ -314,15 +314,15 @@
 /**
  * Text aligned to center
 */
-#define SSD1306_TEXT_CENTER
+#define SSD1306_TEXT_CENTER 0
 /**
  * Text aligned to left
 */
-#define SSD1306_TEXT_LEFT
+#define SSD1306_TEXT_LEFT 1
 /**
  * Text aligned to right
 */
-#define SSD1306_TEXT_RIGHT
+#define SSD1306_TEXT_RIGHT 2
 
 typedef struct ssd1306_display
 {

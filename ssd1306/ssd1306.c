@@ -207,7 +207,7 @@ void ssd1306_print(SSD1306_Display *d, const char *text)
         if ((d->cursor_position + char_width) > d->line_limit)
         {
             uint8_t p = d->line_limit / d->width;
-            if (p == 7)
+            if (p == d->pages - 1)
                 break;
             else
                 ssd1306_set_cursor(d, 0, (p + (d->font)->character_height) - 1);
@@ -226,4 +226,75 @@ void ssd1306_print(SSD1306_Display *d, const char *text)
         d->cursor_position += char_width + d->font->character_spacing;
         i++;
     }
+}
+
+void ssd1306_println(SSD1306_Display *d, const char *text)
+{
+    uint32_t i = 0;
+    while (*(text + i))
+    {
+        uint32_t character = text[i] - d->font->first_character;
+        if (character > (d->font->last_character - d->font->first_character))
+        {
+            character = d->font->overflow_character - d->font->first_character;
+        }
+        uint8_t char_width = d->font->character_width[character];
+        if ((d->cursor_position + char_width) > d->line_limit)
+        {
+            break;
+        }
+        for (int j = 0; j < char_width; j++)
+        {
+            uint32_t offset = (d->font)->character_offset[character] + j;
+            d->frame[d->cursor_position + j] |= (d->font)->font_array[offset];
+            uint32_t vertical_index = d->cursor_position + d->width + j;
+            for (int k = 0; k < ((d->font)->character_height - 1); k++)
+            {
+                d->frame[vertical_index] |= (d->font)->font_array[(d->font)->vertical_offsets[k] + offset];
+                vertical_index += d->width;
+            }
+        }
+        d->cursor_position += char_width + d->font->character_spacing;
+        i++;
+    }
+    uint8_t p = d->line_limit / d->width;
+    if (p != d->pages - 1)
+    {
+        ssd1306_set_cursor(d, 0, (p + (d->font)->character_height) - 1);
+    }
+}
+
+void ssd1306_print_aligned(SSD1306_Display *d, const char *text, uint8_t a)
+{
+    uint32_t i = 0;
+    uint32_t text_width = 0;
+    while (*(text + i))
+    {
+        uint32_t character = text[i] - d->font->first_character;
+        if (character > (d->font->last_character - d->font->first_character))
+        {
+            character = d->font->overflow_character - d->font->first_character;
+        }
+        text_width += d->font->character_width[character];
+        text_width += d->font->character_spacing;
+        i++;
+    }
+    text_width -= d->font->character_spacing;
+    uint8_t c = 0;
+    uint8_t r = d->line_limit / d->width;
+    if (text_width < d->width)
+    {
+        switch (a)
+        {
+        case SSD1306_TEXT_CENTER:
+            c = (d->max_x - text_width) >> 1;
+            break;
+        case SSD1306_TEXT_RIGHT:
+            c = d->max_x - text_width;
+        default:
+            break;
+        }
+    }
+    ssd1306_set_cursor(d, c, r);
+    ssd1306_println(d, text);
 }

@@ -61,6 +61,21 @@ int main(void)
         sleep_ms(DELAY);
 
         ssd1306_clean(display);
+        ssd1306_set_font(display, &ssd1306_font7x11);
+        ssd1306_println(display, "Hello");
+        ssd1306_println(display, "world!");
+        ssd1306_update_graphics(display);
+        sleep_ms(DELAY);
+
+        ssd1306_clean(display);
+        ssd1306_set_font(display, &ssd1306_font7x11);
+        ssd1306_print_aligned(display, "left", SSD1306_TEXT_LEFT);
+        ssd1306_print_aligned(display, "center", SSD1306_TEXT_CENTER);
+        ssd1306_print_aligned(display, "right", SSD1306_TEXT_RIGHT);
+        ssd1306_update_graphics(display);
+        sleep_ms(DELAY);
+
+        ssd1306_clean(display);
         ssd1306_set_font(display, &ssd1306_font5x7);
         ssd1306_print(display, str);
         ssd1306_update_graphics(display);
