@@ -3,7 +3,7 @@
  * @brief Library to drive a SSD1306 128x64 dot matrix OLED display using I2C
  * @author Iván Santiago
  * @date 2023-07-31 20:43
-*/
+ */
 #ifndef SSD1306_H_
 #define SSD1306_H_
 
@@ -12,7 +12,7 @@
 
 /**
  * I2C instance
-*/
+ */
 #define SSD1306_I2C i2c0
 /**
  * SSD1306 I2C address
@@ -325,26 +325,26 @@ typedef struct ssd1306_display
 /**
  * Set the display to a resolution of 128x64 dots in normal mode
  * and horizontal addressing mode
- * @return a pointer to SSD1306_Display 
-*/
+ * @return a pointer to SSD1306_Display
+ */
 SSD1306_Display *ssd1306_init(void);
 
 /**
  * Deallocates the memory used by a SSD1306_Display
  * @param d pointer to SSD1306_Display
-*/
+ */
 void ssd1306_destroy_display(SSD1306_Display *d);
 
 /**
  * Fills the frame buffer of a SSD1306_Display with 0x00
  * @param d pointer to SSD1306_Display
-*/
+ */
 void ssd1306_clean(SSD1306_Display *d);
 
 /**
  * Writes the frame content of SSD1306_Display on the SSD1306 GDDRAM
  * @param d pointer to SSD1306_Display
-*/
+ */
 void ssd1306_update_graphics(SSD1306_Display *d);
 
 /**
@@ -352,16 +352,46 @@ void ssd1306_update_graphics(SSD1306_Display *d);
  * @param d pointer to SSD1306_Display
  * @param x position on the x-axis
  * @param y position on the y-axis
-*/
-void ssd1306_put_pixel(SSD1306_Display *d, uint8_t x, uint8_t y);
+ */
+static inline void ssd1306_put_pixel(SSD1306_Display *d, uint8_t x, uint8_t y)
+{
+    if (x < d->width && y < d->heigth)
+    {
+        uint32_t index = 1 + x + (y >> 3) * d->width;
+        if (d->frame[index] < 0xFF)
+        {
+            uint32_t value = 1 << (y % 8);
+            d->frame[index] |= value;
+        }
+    }
+}
 
 /**
- * Draw a line from (x1, y1) to (x2, y2) on the SSD1306_Display frame
+ * Draws a line from (x1, y1) to (x2, y2) on the SSD1306_Display frame
  * @param d pointer to SSD1306_Display
  * @param x1 first point x-axis position
  * @param y1 first point y-axis position
  * @param x2 second point x-axis position
  * @param y2 second point y-axis position
-*/
+ */
 void ssd1306_draw_line(SSD1306_Display *d, int8_t x1, int8_t y1, int8_t x2, int8_t y2);
+
+/**
+ * Draws an ellipse with center (cx, cy) on the SSD1306_Display frame
+ * @param d pointer to SSD1306_Display
+ * @param cx center point x-axis position
+ * @param cy center point y-axis position
+ * @param a horizontal length
+ * @param b vertical length
+*/
+void ssd1306_draw_ellipse(SSD1306_Display *d, int8_t cx, int8_t cy, int8_t a, int8_t b);
+
+/**
+ * Draws a circle with center (cx, xy) and radio r on the SSD1306_Display frame
+ * @param d pointer to SSD1306_Display
+ * @param cx center point x-axis position
+ * @param cy center point y-axis position
+ * @param r radius
+*/
+void ssd1306_draw_circle(SSD1306_Display *d, int8_t cx, int8_t cy, int8_t r);
 #endif

@@ -61,19 +61,6 @@ void ssd1306_update_graphics(SSD1306_Display *d)
     i2c_write_blocking(SSD1306_I2C, SSD1306_ADDRESS, d->frame, d->frame_length, false);
 }
 
-void ssd1306_put_pixel(SSD1306_Display *d, uint8_t x, uint8_t y)
-{
-    if (x < d->width && y < d->heigth)
-    {
-        uint32_t index = 1 + x + (y >> 3) * d->width;
-        if (d->frame[index] < 0xFF)
-        {
-            uint32_t value = 1 << (y % 8);
-            d->frame[index] |= value;
-        }
-    }
-}
-
 void ssd1306_draw_line(SSD1306_Display *d, int8_t x1, int8_t y1, int8_t x2, int8_t y2)
 {
     if ((y1 > 0 || y2 > 0) && (x1 > 0 || x2 > 0))
@@ -132,4 +119,56 @@ void ssd1306_draw_line(SSD1306_Display *d, int8_t x1, int8_t y1, int8_t x2, int8
             }
         }
     }
+}
+
+void ssd1306_draw_ellipse(SSD1306_Display *d, int8_t cx, int8_t cy, int8_t a, int8_t b)
+{
+    int32_t x = -a;
+    int32_t y = 0;
+    int32_t de = b;
+    int32_t dx = (1 + 2 * x) * de * de;
+    int32_t dy = x * x;
+    int32_t e = dx + dy;
+    do
+    {
+        ssd1306_put_pixel(d, cx - x, cy + y);
+        ssd1306_put_pixel(d, cx + x, cy + y);
+        ssd1306_put_pixel(d, cx + x, cy - y);
+        ssd1306_put_pixel(d, cx - x, cy - y);
+        de = 2 * e;
+        if (de >= dx)
+        {
+            x++;
+            e += dx += 2 * b * b;
+        }
+        if (de <= dy)
+        {
+            y++;
+            e += dy += 2 * a * a;
+        }
+    } while (x <= 0);
+    while (y++ < b)
+    {
+        ssd1306_put_pixel(d, cx, cy + y);
+        ssd1306_put_pixel(d, cx, cy - y);
+    }
+}
+
+void ssd1306_draw_circle(SSD1306_Display *d, int8_t cx, int8_t cy, int8_t r)
+{
+    int16_t x = -r;
+    int16_t y = 0;
+    int16_t e = 2 - 2 * r;
+    do
+    {
+        ssd1306_put_pixel(d, cx - x, cy + y);
+        ssd1306_put_pixel(d, cx - y, cy - x);
+        ssd1306_put_pixel(d, cx + x, cy - y);
+        ssd1306_put_pixel(d, cx + y, cy + x);
+        r = e;
+        if (r <= y)
+            e += ++y * 2 + 1;
+        if (r > x || e > y)
+            e += ++x * 2 + 1;
+    } while (x < 0);
 }
