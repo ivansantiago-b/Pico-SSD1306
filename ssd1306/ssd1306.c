@@ -298,3 +298,45 @@ void ssd1306_print_aligned(SSD1306_Display *d, const char *text, uint8_t a)
     ssd1306_set_cursor(d, c, r);
     ssd1306_println(d, text);
 }
+
+void ssd1306_activate_horizontal_scroll(uint8_t rl, uint8_t start_page, uint8_t end_page, uint8_t frame_rate)
+{
+    uint8_t scroll_commands[9] = {
+        SSD1306_CONTROL_BYTE_COMMAND,
+        rl ? SSD1306_CONTINUOUS_HORIZONTAL_SCROLL_RIGHT : SSD1306_CONTINUOUS_HORIZONTAL_SCROLL_LEFT,
+        SSD1306_DUMMY_BYTE_00,
+        start_page,
+        frame_rate,
+        end_page,
+        SSD1306_DUMMY_BYTE_00,
+        SSD1306_DUMMY_BYTE_FF,
+        SSD1306_ACTIVATE_SCROLL};
+    i2c_write_blocking(SSD1306_I2C, SSD1306_ADDRESS, scroll_commands, 9, false);
+}
+void ssd1306_activate_vertical_and_horizontal_scroll(uint8_t rl, uint8_t start_page, uint8_t end_page, uint8_t start_row, uint8_t end_row, uint8_t vertical_scrolling_offset, uint8_t frame_rate)
+{
+    uint8_t scroll_commands[11] = {
+        SSD1306_CONTROL_BYTE_COMMAND,
+        SSD1306_SET_VERTICAL_SCROLL_AREA,
+        start_row,
+        end_row,
+        rl ? SSD1306_VERTICAL_AND_RIGHT_HORIZONTAL_SCROLL : SSD1306_VERTICAL_AND_LEFT_HORIZONTAL_SCROLL,
+        SSD1306_DUMMY_BYTE_00,
+        start_page,
+        frame_rate,
+        end_page,
+        vertical_scrolling_offset,
+        SSD1306_ACTIVATE_SCROLL
+    };
+    i2c_write_blocking(SSD1306_I2C, SSD1306_ADDRESS, scroll_commands, 11, false);
+}
+
+void ssd1306_deactivate_scroll(void)
+{
+    uint8_t deactivation_command[2] = 
+    {
+        SSD1306_CONTROL_BYTE_COMMAND,
+        SSD1306_DEACTIVATE_SCROLL
+    };
+    i2c_write_blocking(SSD1306_I2C, SSD1306_ADDRESS, deactivation_command, 2, false);
+}

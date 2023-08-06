@@ -304,6 +304,38 @@
  */
 #define SSD1306_CHARGE_PUMP_SETTING 0x8D
 /**
+ * Scroll time step: 5 frames
+*/
+#define SSD1306_SCROLL_5_FRAMES 0x00
+/**
+ * Scroll time step: 64 frames
+*/
+#define SSD1306_SCROLL_64_FRAMES 0x01
+/**
+ * Scroll time step: 128 frames
+*/
+#define SSD1306_SCROLL_128_FRAMES 0x02
+/**
+ * Scroll time step: 256 frames
+*/
+#define SSD1306_SCROLL_256_FRAMES 0x03
+/**
+ * Scroll time step: 3 frames
+*/
+#define SSD1306_SCROLL_3_FRAMES 0x04
+/**
+ * Scroll time step: 4 frames
+*/
+#define SSD1306_SCROLL_4_FRAMES 0x05
+/**
+ * Scroll time step: 25 frames
+*/
+#define SSD1306_SCROLL_25_FRAMES 0x06
+/**
+ * Scroll time step: 2 frames
+*/
+#define SSD1306_SCROLL_2_FRAMES 0x07
+/**
  * Control byte that indicates that the following byte is a command
  */
 #define SSD1306_CONTROL_BYTE_COMMAND 0x00
@@ -448,4 +480,33 @@ void ssd1306_println(SSD1306_Display *d, const char *text);
  * @param a alignement: SSD1306_TEXT_CENTER, SSD1306_TEXT_LEFT or SSD1306_TEXT_RIGHT
 */
 void ssd1306_print_aligned(SSD1306_Display *d, const char *text, uint8_t a);
+
+/**
+ * Configures and activates continuous horizontal scroll
+ * @param rl 0: left scroll; 1: right scroll
+ * @param start_page range [0, 7]
+ * @param end_page range [0, 7]
+ * @param frame_rate 2, 3, 4, 5, 25, 64, 128 or 256 frames, use SSD1306_SCROLL_N_FRAMES macros
+ * @note end_page most be larger or equal to start_page
+*/
+void ssd1306_activate_horizontal_scroll(uint8_t rl, uint8_t start_page, uint8_t end_page, uint8_t frame_rate);
+
+/**
+ * Configures and activates continuous vertical and horizontal scroll
+ * @param rl 0: left and vertical scroll; 1 right and vertical scroll
+ * @param start_page range [0, 7]
+ * @param end_page range [0, 7]
+ * @param start_row range [0, 63]
+ * @param end_row range[0, 63]
+ * @param frame_rate 2, 3, 4, 5, 25, 64, 128 or 256 frames, use SSD1306_SCROLL_N_FRAMES macros
+ * @param vertical_scrolling_offset range [0, 63]
+ * @note end_row must be larger than vertical_scrolling_offset
+*/
+void ssd1306_activate_vertical_and_horizontal_scroll(uint8_t rl, uint8_t start_page, uint8_t end_page, uint8_t start_row, uint8_t end_row, uint8_t vertical_scrolling_offset, uint8_t frame_rate);
+
+/**
+ * Deactivates continuos scroll
+ * @note After this command the ram data needs to be rewritten
+*/
+void ssd1306_deactivate_scroll(void);
 #endif
