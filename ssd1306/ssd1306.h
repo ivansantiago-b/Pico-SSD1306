@@ -372,6 +372,18 @@ typedef struct ssd1306_display
 } SSD1306_Display;
 
 /**
+ * Writes data/command on the SSD1306
+ * @param data bytes to be written
+ * @param length number of bytes to be written
+ * @note The first byte of data must be a byte control 'SSD1306_CONTROL_BYTE_COMMAND' 
+ * to write a frame of commands or 'SSD1306_CONTROL_BYTE_DATA' to write on the GDDRAM
+*/
+static inline void ssd1306_write(const uint8_t *data, uint32_t length)
+{
+    i2c_write_blocking(SSD1306_I2C, SSD1306_ADDRESS, data, length, false);
+}
+
+/**
  * Set the display to a resolution of 128x64 dots in normal mode
  * and horizontal addressing mode
  * @return a pointer to SSD1306_Display

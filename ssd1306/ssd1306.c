@@ -1,5 +1,4 @@
 #include "ssd1306.h"
-#include "hardware/i2c.h"
 #include <stdlib.h>
 
 SSD1306_Display *ssd1306_init(void)
@@ -36,7 +35,7 @@ SSD1306_Display *ssd1306_init(void)
         SSD1306_HORIZONTAL_ADDRESSING_MODE,
         SSD1306_SET_COLUMN_ADDRESS, 0x00, 0x7F,
         SSD1306_SET_PAGE_ADDRESS, 0x00, 0x07};
-    i2c_write_blocking(SSD1306_I2C, SSD1306_ADDRESS, init_commands, 27, false);
+    ssd1306_write(init_commands, 27);
 
     return display;
 }
@@ -62,7 +61,7 @@ void ssd1306_clean(SSD1306_Display *d)
 
 void ssd1306_update_graphics(SSD1306_Display *d)
 {
-    i2c_write_blocking(SSD1306_I2C, SSD1306_ADDRESS, d->frame, d->frame_length, false);
+    ssd1306_write(d->frame, d->frame_length);
 }
 
 void ssd1306_draw_line(SSD1306_Display *d, int8_t x1, int8_t y1, int8_t x2, int8_t y2)
@@ -301,7 +300,7 @@ void ssd1306_print_aligned(SSD1306_Display *d, const char *text, uint8_t a)
 
 void ssd1306_activate_horizontal_scroll(uint8_t rl, uint8_t start_page, uint8_t end_page, uint8_t frame_rate)
 {
-    uint8_t scroll_commands[9] = {
+    const uint8_t scroll_commands[9] = {
         SSD1306_CONTROL_BYTE_COMMAND,
         rl ? SSD1306_CONTINUOUS_HORIZONTAL_SCROLL_RIGHT : SSD1306_CONTINUOUS_HORIZONTAL_SCROLL_LEFT,
         SSD1306_DUMMY_BYTE_00,
@@ -311,11 +310,11 @@ void ssd1306_activate_horizontal_scroll(uint8_t rl, uint8_t start_page, uint8_t 
         SSD1306_DUMMY_BYTE_00,
         SSD1306_DUMMY_BYTE_FF,
         SSD1306_ACTIVATE_SCROLL};
-    i2c_write_blocking(SSD1306_I2C, SSD1306_ADDRESS, scroll_commands, 9, false);
+    ssd1306_write(scroll_commands, 9);
 }
 void ssd1306_activate_vertical_and_horizontal_scroll(uint8_t rl, uint8_t start_page, uint8_t end_page, uint8_t start_row, uint8_t end_row, uint8_t vertical_scrolling_offset, uint8_t frame_rate)
 {
-    uint8_t scroll_commands[11] = {
+    const uint8_t scroll_commands[11] = {
         SSD1306_CONTROL_BYTE_COMMAND,
         SSD1306_SET_VERTICAL_SCROLL_AREA,
         start_row,
@@ -328,15 +327,15 @@ void ssd1306_activate_vertical_and_horizontal_scroll(uint8_t rl, uint8_t start_p
         vertical_scrolling_offset,
         SSD1306_ACTIVATE_SCROLL
     };
-    i2c_write_blocking(SSD1306_I2C, SSD1306_ADDRESS, scroll_commands, 11, false);
+    ssd1306_write(scroll_commands, 11);
 }
 
 void ssd1306_deactivate_scroll(void)
 {
-    uint8_t deactivation_command[2] = 
+    const uint8_t deactivation_command[2] = 
     {
         SSD1306_CONTROL_BYTE_COMMAND,
         SSD1306_DEACTIVATE_SCROLL
     };
-    i2c_write_blocking(SSD1306_I2C, SSD1306_ADDRESS, deactivation_command, 2, false);
+    ssd1306_write(deactivation_command, 2);
 }
